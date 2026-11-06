@@ -7,9 +7,10 @@
   <style>
     :root {
       color-scheme: dark;
-      font-family: system-ui, sans-serif;
-      font-size: 13px;
+      font: 13px system-ui, sans-serif;
     }
+
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -18,10 +19,8 @@
       color: #eceef4;
     }
 
-    h3 {
-      font-size: 14px;
-      margin: 0 0 12px;
-    }
+    h3 { font-size: 15px; margin: 0 0 14px; }
+    h4 { font-size: 13px; margin: 0; }
 
     label {
       display: block;
@@ -30,29 +29,31 @@
       margin: 10px 0 5px;
     }
 
-    select, input[type="number"] {
-      box-sizing: border-box;
+    select, input[type="number"], input[type="text"] {
       width: 100%;
       padding: 8px;
       background: #30333c;
-      color: white;
+      color: #fff;
       border: 1px solid #484c59;
       border-radius: 5px;
     }
 
     input[type="color"] {
       width: 100%;
-      height: 33px;
+      height: 34px;
       padding: 2px;
+      background: #30333c;
       border: 1px solid #484c59;
       border-radius: 5px;
-      background: #30333c;
     }
 
-    input[type="file"] {
+    input[type="range"] {
       width: 100%;
-      font-size: 11px;
+      accent-color: #52beaa;
     }
+
+    input[type="checkbox"] { accent-color: #52beaa; }
+    input[type="file"] { width: 100%; font-size: 11px; }
 
     button {
       background: #454b5b;
@@ -63,127 +64,346 @@
       cursor: pointer;
     }
 
-    .state-tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-top: 14px;
-    }
+    button.primary { background: #287b6c; }
+    button.danger { background: #70343b; }
+    button:disabled { opacity: .45; cursor: default; }
 
-    .state-tabs button.selected {
-      background: #287b6c;
-    }
-
-    .preview {
-      width: 108px;
-      height: 108px;
-      display: block;
-      margin: 14px auto;
-      border-radius: 12px;
+    .section {
+      border-top: 1px solid #3c3e47;
+      margin-top: 16px;
+      padding-top: 14px;
     }
 
     .row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 9px;
     }
 
-    .hidden {
-      display: none;
+    .state-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 12px;
     }
+
+    .state-tabs button.selected { background: #287b6c; }
+    .hidden { display: none !important; }
 
     .hint {
       font-size: 11px;
       color: #a8afbe;
-      margin-top: 6px;
+      margin: 6px 0 0;
+      line-height: 1.45;
+    }
+
+    .check {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .check label { margin: 0; }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preview-panel {
+      background: #191b22;
+      border-radius: 9px;
+      margin-top: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .preview {
+      display: block;
+      width: 144px;
+      height: 144px;
+      margin: auto;
     }
 
     .status {
-      min-height: 16px;
+      min-height: 18px;
+      margin-top: 12px;
       color: #7fd9b4;
-      margin-top: 10px;
       font-size: 11px;
+    }
+
+    .status.error { color: #ff9d9d; }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .preset-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .preset-actions button {
+      padding: 8px 4px;
+      font-size: 11px;
+    }
+
+    .preset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
     }
   </style>
 </head>
 <body>
   <h3 id="heading">Voicemeeter Potato</h3>
 
-  <label for="strip">Strip</label>
-  <select id="strip"></select>
+  <section>
+    <h4>Button settings</h4>
 
-  <div id="gainFields" class="hidden">
-    <label for="step">Gain step (dB)</label>
-    <input id="step" type="number" min="0.1" max="12" step="0.1">
-  </div>
+    <label for="strip">Strip</label>
+    <select id="strip"></select>
 
-  <div id="routeFields" class="hidden">
-    <label for="route">Routing bus</label>
-    <select id="route"></select>
-  </div>
-
-  <div class="state-tabs">
-    <button id="offTab" class="selected">OFF / Normal</button>
-    <button id="onTab">ON / Active</button>
-  </div>
-
-  <div class="row">
-    <div>
-      <label for="bg">Background</label>
-      <input type="color" id="bg">
+    <div id="gainFields" class="hidden">
+      <label for="step">Gain step (dB)</label>
+      <input id="step" type="number" min="0.1" max="12" step="0.1">
     </div>
-    <div>
-      <label for="fg">Foreground</label>
-      <input type="color" id="fg">
+
+    <div id="routeFields" class="hidden">
+      <label for="route">Routing bus</label>
+      <select id="route"></select>
     </div>
-  </div>
+  </section>
 
-  <label for="stroke">Outline</label>
-  <input type="color" id="stroke">
+  <section class="section">
+    <h4>Appearance</h4>
 
-  <label for="svgFile">Custom SVG for this state</label>
-  <input type="file" id="svgFile" accept=".svg,image/svg+xml">
-  <div class="hint">Maximum 32 KB. Simple vector SVGs only.</div>
+    <div class="state-tabs">
+      <button id="offTab" class="selected" type="button">
+        OFF / Normal
+      </button>
+      <button id="onTab" type="button">ON / Active</button>
+    </div>
 
-  <div class="row" style="margin-top:10px">
-    <button id="clearSvg">Use default icon</button>
-    <button id="resetStyle">Reset state style</button>
-  </div>
+    <div class="preview-panel">
+      <img id="preview" class="preview" alt="Button preview">
+      <p id="previewHint" class="hint"></p>
+    </div>
 
-  <img id="preview" class="preview" alt="Icon preview">
-  <div class="status" id="status"></div>
+    <div class="section">
+      <h4>Colors</h4>
 
+      <div class="row">
+        <div>
+          <label for="bg">Background</label>
+          <input id="bg" type="color">
+        </div>
+        <div>
+          <label for="iconColor">Icon color</label>
+          <input id="iconColor" type="color">
+        </div>
+      </div>
+
+      <label for="fg">Footer text color</label>
+      <input id="fg" type="color">
+    </div>
+
+    <div class="section">
+      <h4>Outline</h4>
+
+      <div class="check">
+        <input id="outlineVisible" type="checkbox" checked>
+        <label for="outlineVisible">Show outline</label>
+      </div>
+
+      <div id="outlineFields">
+        <label for="stroke">Outline color</label>
+        <input id="stroke" type="color">
+
+        <div class="row">
+          <div>
+            <label for="outlineWidth">Thickness (0–12)</label>
+            <input id="outlineWidth" type="number"
+                   min="0" max="12" step="0.5">
+          </div>
+          <div>
+            <label for="outlineRadius">Radius (0–64)</label>
+            <input id="outlineRadius" type="number"
+                   min="0" max="64" step="1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h4>Icon position and size</h4>
+
+      <div class="slider-label">
+        <label for="iconScale">Scale</label>
+        <span id="scaleValue">100%</span>
+      </div>
+
+      <input id="iconScale" type="range"
+             min="25" max="200" step="1">
+
+      <div class="row">
+        <div>
+          <label for="iconX">Horizontal position</label>
+          <input id="iconX" type="number"
+                 min="-48" max="48" step="1">
+        </div>
+        <div>
+          <label for="iconY">Vertical position</label>
+          <input id="iconY" type="number"
+                 min="-48" max="48" step="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h4>Custom SVG</h4>
+
+      <label for="svgFile">SVG for this button and state</label>
+      <input id="svgFile" type="file" accept=".svg,image/svg+xml">
+
+      <p class="hint">
+        Maximum 32 KB. Only safe vector primitives are accepted.
+      </p>
+
+      <div class="actions">
+        <button id="clearSvg" type="button">
+          Use default icon
+        </button>
+        <button id="resetStyle" type="button">
+          Reset state style
+        </button>
+      </div>
+
+      <p id="svgInfo" class="hint"></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="preset-header">
+      <h4>Visual Presets</h4>
+      <button id="refreshPresets" type="button">
+        Refresh
+      </button>
+    </div>
+
+    <p class="hint">
+      Presets synchronize when selecting a button or returning
+      to the Inspector. Each preset has a stable UUID.
+    </p>
+
+    <label for="presetSelect">Saved presets</label>
+    <select id="presetSelect" disabled>
+      <option value="">Loading presets...</option>
+    </select>
+
+    <div class="preset-actions">
+      <button id="applyPreset" type="button"
+              class="primary" disabled>Apply</button>
+      <button id="renamePreset" type="button"
+              disabled>Rename</button>
+      <button id="deletePreset" type="button"
+              class="danger" disabled>Delete</button>
+    </div>
+
+    <label for="presetName">New preset name</label>
+    <input id="presetName" type="text" maxlength="48"
+           placeholder="Preset name">
+
+    <button id="savePreset" type="button"
+            class="primary" style="width:100%;margin-top:8px"
+            disabled>Save current appearance</button>
+
+    <p class="hint">
+      Maximum 30 presets. Strip, Gain Step and Routing
+      are preserved when applying a preset.
+    </p>
+  </section>
+
+  <div class="status" id="status"
+       role="status" aria-live="polite"></div>
+
+  <script src="visual.js"></script>
   <script>
-    "use strict";
+    'use strict';
 
-    const PREFIX = "com.opendeck.voicemeeter.";
-    const ROUTES = ["A1","A2","A3","A4","A5","B1","B2","B3"];
+    const PREFIX = 'dev.atno.voicemeeter.';
+    const ROUTES = [
+      'A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3'
+    ];
+    const ACTIONS = [
+      'gainup', 'gaindown', 'mute',
+      'solo', 'mono', 'route'
+    ];
+    const STYLE_KEYS = [
+      'bg', 'fg', 'stroke', 'iconColor',
+      'outlineVisible', 'outlineWidth',
+      'outlineRadius', 'iconScale',
+      'iconX', 'iconY', 'svg'
+    ];
+
     const $ = id => document.getElementById(id);
+    const visual = window.VoicemeeterVisual;
 
     let ws;
-    let context = "";
-    let action = "";
+    let context = '';
+    let fullAction = '';
+    let action = '';
     let settings = {};
-    let state = "off";
+    let state = 'off';
+    let dirty = false;
 
-    const defaults = active => ({
-      bg: active ? (action === "mute" ? "#842c38" : "#18534b") : "#171c27",
-      fg: "#ffffff",
-      stroke: active ? "#54e5bb" : "#65748b"
-    });
+    let presets = [];
+    let presetsLoaded = false;
+    let pendingRequest = null;
+    let requestId = 0;
+    let presetTimer = null;
+    let refreshQueued = false;
+
+    let lastRefreshAt = 0;
+    const REFRESH_COOLDOWN_MS = 300;
+
+    function status(message, error = false) {
+      $('status').textContent = message;
+      $('status').classList.toggle('error', error);
+    }
 
     function send(event, payload) {
-      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        return false;
+      }
+
       ws.send(JSON.stringify({ event, ...payload }));
+      return true;
     }
 
     function save() {
-      send("setSettings", {
-        action: PREFIX + action,
+      if (!dirty) return true;
+
+      if (!send('setSettings', {
+        action: fullAction,
         context,
         payload: settings
-      });
-      $("status").textContent = "Settings saved";
+      })) {
+        status('Not connected: changes were not saved.', true);
+        return false;
+      }
+
+      dirty = false;
+      status('Button settings sent.');
+      return true;
     }
 
     function currentStyle() {
@@ -192,212 +412,641 @@
       return settings.styles[state];
     }
 
-    function symbol() {
-      switch (action) {
-        case "gainup": return "+";
-        case "gaindown": return "−";
-        case "mute": return "M";
-        case "solo": return "S";
-        case "mono": return "MONO";
-        case "route": return settings.route || "A1";
-        default: return "VM";
-      }
+    function setProperty(key, value) {
+      currentStyle()[key] = value;
+      dirty = true;
+      updatePreview();
     }
 
-    function preview() {
-      const colors = {
-        ...defaults(state === "on"),
-        ...currentStyle()
-      };
+    function updatePreview() {
+      if (!visual || !ACTIONS.includes(action)) return;
 
-      const text = symbol();
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg"
-          width="144" height="144" viewBox="0 0 144 144">
-          <rect width="144" height="144" rx="17"
-            fill="${colors.bg}"/>
-          <rect x="5" y="5" width="134" height="134" rx="13"
-            fill="none" stroke="${colors.stroke}" stroke-width="5"/>
-          <text x="72" y="87" text-anchor="middle"
-            font-family="Arial" font-weight="bold"
-            font-size="${text.length > 2 ? 25 : 56}"
-            fill="${colors.fg}">${text}</text>
-        </svg>`;
+      try {
+        const svg = visual.renderSvg(action, settings, state);
 
-      const custom = currentStyle().svg;
-      if (custom) {
-        const encoded = btoa(
-          Array.from(new TextEncoder().encode(custom),
-            byte => String.fromCharCode(byte)).join("")
-        );
-
-        const customImage = `<image x="24" y="22"
-          width="96" height="96"
-          href="data:image/svg+xml;base64,${encoded}"/>`;
-
-        const combined = svg.replace(/<text[\s\S]*?<\/text>/, customImage);
-        $("preview").src = "data:image/svg+xml;charset=utf-8," +
-          encodeURIComponent(combined);
-      } else {
-        $("preview").src = "data:image/svg+xml;charset=utf-8," +
+        $('preview').src =
+          'data:image/svg+xml;charset=utf-8,' +
           encodeURIComponent(svg);
+
+        $('previewHint').textContent =
+          ['gainup', 'gaindown'].includes(action)
+            ? 'Preview uses OFFLINE; physical button shows live gain.'
+            : 'Preview of the selected visual state.';
+      } catch (error) {
+        status('Preview error: ' + error.message, true);
       }
     }
 
     function render() {
-      $("strip").value = String(settings.strip ?? 0);
-      $("step").value = String(settings.step ?? 1);
-      $("route").value = settings.route ?? "A1";
+      if (!visual || !ACTIONS.includes(action)) return;
 
-      $("gainFields").classList.toggle(
-        "hidden",
-        !["gainup","gaindown"].includes(action)
+      $('strip').value = String(settings.strip ?? 0);
+      $('step').value = String(settings.step ?? 1);
+      $('route').value = settings.route ?? 'A1';
+
+      $('gainFields').classList.toggle(
+        'hidden', !['gainup', 'gaindown'].includes(action)
       );
-      $("routeFields").classList.toggle(
-        "hidden",
-        action !== "route"
+      $('routeFields').classList.toggle(
+        'hidden', action !== 'route'
       );
 
-      const colors = { ...defaults(state === "on"), ...currentStyle() };
+      $('offTab').classList.toggle('selected', state === 'off');
+      $('onTab').classList.toggle('selected', state === 'on');
 
-      for (const id of ["bg","fg","stroke"]) {
-        $(id).value = colors[id];
+      $('offTab').setAttribute(
+        'aria-pressed', String(state === 'off')
+      );
+      $('onTab').setAttribute(
+        'aria-pressed', String(state === 'on')
+      );
+
+      const style = visual.resolveStyle(
+        action, state, settings.styles
+      );
+
+      for (const key of [
+        'bg', 'fg', 'stroke', 'iconColor'
+      ]) {
+        $(key).value = style[key];
       }
 
-      $("offTab").classList.toggle("selected", state === "off");
-      $("onTab").classList.toggle("selected", state === "on");
-      $("svgFile").value = "";
+      $('outlineVisible').checked = style.outlineVisible;
+      $('outlineWidth').value = String(style.outlineWidth);
+      $('outlineRadius').value = String(style.outlineRadius);
 
-      preview();
+      const percent = Math.round(style.iconScale * 100);
+      $('iconScale').value = String(percent);
+      $('scaleValue').textContent = percent + '%';
+
+      $('iconX').value = String(style.iconX);
+      $('iconY').value = String(style.iconY);
+
+      $('outlineFields').classList.toggle(
+        'hidden', !style.outlineVisible
+      );
+
+      $('svgInfo').textContent = style.svg
+        ? 'Custom SVG configured for this state.'
+        : 'Using the default symbol.';
+
+      $('svgFile').value = '';
+      updatePreview();
     }
 
-    function selectState(next) {
-      state = next;
+    function bindColor(key) {
+      $(key).addEventListener('input', () => {
+        setProperty(key, $(key).value);
+      });
+      $(key).addEventListener('change', save);
+    }
+
+    function bindNumber(key, min, max) {
+      $(key).addEventListener('change', () => {
+        const raw = $(key).value;
+        const value = Number(raw);
+
+        if (
+          !raw.trim() ||
+          !Number.isFinite(value) ||
+          value < min ||
+          value > max
+        ) {
+          status(`${key} must be between ${min} and ${max}.`, true);
+          render();
+          return;
+        }
+
+        setProperty(key, value);
+        save();
+      });
+    }
+
+    function captureAppearance() {
+      const output = {};
+
+      for (const visualState of ['off', 'on']) {
+        const resolved = visual.resolveStyle(
+          action, visualState, settings.styles
+        );
+
+        output[visualState] = {};
+
+        for (const key of STYLE_KEYS) {
+          if (resolved[key] !== undefined) {
+            output[visualState][key] = resolved[key];
+          }
+        }
+      }
+
+      return output;
+    }
+
+    function normalizeAppearance(input) {
+      if (
+        !input || typeof input !== 'object' ||
+        Array.isArray(input) ||
+        !input.off || !input.on
+      ) return null;
+
+      const output = {};
+
+      for (const visualState of ['off', 'on']) {
+        const raw = input[visualState];
+
+        if (
+          !raw || typeof raw !== 'object' ||
+          Array.isArray(raw)
+        ) return null;
+
+        if (
+          Object.hasOwn(raw, 'svg') &&
+          raw.svg !== undefined &&
+          !visual.sanitizeSvg(raw.svg)
+        ) return null;
+
+        const resolved = visual.resolveStyle(
+          action, visualState, { [visualState]: raw }
+        );
+
+        output[visualState] = {};
+
+        for (const key of STYLE_KEYS) {
+          if (resolved[key] !== undefined) {
+            output[visualState][key] = resolved[key];
+          }
+        }
+      }
+
+      return output;
+    }
+
+    function selectedPreset() {
+      return presets.find(
+        item => item.id === $('presetSelect').value
+      );
+    }
+
+    function updatePresetControls() {
+      const busy = pendingRequest !== null;
+      const selected = Boolean(selectedPreset());
+
+      $('presetSelect').disabled =
+        !presetsLoaded || presets.length === 0;
+
+      $('refreshPresets').disabled = busy;
+      $('savePreset').disabled = !presetsLoaded || busy;
+      $('applyPreset').disabled = busy || !selected;
+      $('renamePreset').disabled = busy || !selected;
+      $('deletePreset').disabled = busy || !selected;
+    }
+
+    function renderPresetList(preferredId = '') {
+      const select = $('presetSelect');
+      const previous = preferredId || select.value;
+
+      select.replaceChildren();
+
+      if (!presetsLoaded) {
+        select.add(new Option('Loading presets...', ''));
+      } else if (!presets.length) {
+        select.add(new Option('No saved presets', ''));
+      } else {
+        for (const item of presets) {
+          select.add(new Option(item.name, item.id));
+        }
+      }
+
+      if (presets.some(item => item.id === previous)) {
+        select.value = previous;
+      }
+
+      updatePresetControls();
+    }
+
+    function presetRequest(op, data = {}) {
+      if (pendingRequest) {
+        if (op === 'list') refreshQueued = true;
+        return false;
+      }
+
+      const id = ++requestId;
+
+      if (!send('sendToPlugin', {
+        action: fullAction,
+        context,
+        payload: {
+          scope: 'visualPresets',
+          op,
+          requestId: id,
+          ...data
+        }
+      })) {
+        status('Cannot contact the plugin.', true);
+        return false;
+      }
+
+      pendingRequest = { id, op, data };
+
+      presetTimer = setTimeout(() => {
+        if (!pendingRequest || pendingRequest.id !== id) return;
+
+        pendingRequest = null;
+        presetTimer = null;
+        refreshQueued = false;
+
+        status('Preset request timed out.', true);
+        updatePresetControls();
+      }, 5000);
+
+      updatePresetControls();
+      return true;
+    }
+
+    function refreshPresets(force = false) {
+      if (!force) {
+        const now = Date.now();
+
+        if (now - lastRefreshAt < REFRESH_COOLDOWN_MS) {
+          return;
+        }
+
+        lastRefreshAt = now;
+      }
+
+      presetRequest('list');
+    }
+
+    function handlePresetReply(reply) {
+      if (
+        !reply ||
+        reply.scope !== 'visualPresets' ||
+        !pendingRequest ||
+        reply.requestId !== pendingRequest.id
+      ) return;
+
+      clearTimeout(presetTimer);
+      presetTimer = null;
+
+      const completed = pendingRequest;
+      pendingRequest = null;
+
+      if (!reply.ok || !Array.isArray(reply.presets)) {
+        status(reply.error || 'Preset operation failed.', true);
+        updatePresetControls();
+      } else {
+        presets = reply.presets;
+        presetsLoaded = true;
+
+        const preferredId = completed.data.id || '';
+
+        renderPresetList(preferredId);
+
+        if (completed.op === 'save') {
+          $('presetName').value = '';
+        }
+
+        if (completed.op !== 'list') {
+          status(reply.message || 'Preset library updated.');
+        }
+      }
+
+      if (refreshQueued) {
+        refreshQueued = false;
+        refreshPresets(true);
+      }
+    }
+
+    function createPreset() {
+      const name = $('presetName').value.trim();
+
+      if (!name || name.length > 48) {
+        status('Enter a name (1–48 characters).', true);
+        return;
+      }
+
+      const existing = presets.find(
+        p => p.name.toLowerCase() === name.toLowerCase()
+      );
+
+      if (
+        existing &&
+        !confirm(`Replace preset "${existing.name}"?`)
+      ) return;
+
+      presetRequest('save', {
+        ...(existing ? { id: existing.id } : {}),
+        name,
+        styles: captureAppearance()
+      });
+    }
+
+    function applyPreset() {
+      const item = selectedPreset();
+      if (!item) return;
+
+      const styles = normalizeAppearance(item.styles);
+
+      if (!styles) {
+        status('Invalid preset appearance.', true);
+        return;
+      }
+
+      settings.styles = styles;
+      dirty = true;
       render();
+
+      if (save()) {
+        status(`Applied "${item.name}" to this button.`);
+      }
+    }
+
+    function renamePreset() {
+      const item = selectedPreset();
+      if (!item) return;
+
+      const value = prompt('New preset name:', item.name);
+      if (value === null) return;
+
+      const name = value.trim();
+
+      if (!name || name.length > 48) {
+        status('Invalid preset name.', true);
+        return;
+      }
+
+      presetRequest('rename', {
+        id: item.id,
+        name
+      });
+    }
+
+    function deletePreset() {
+      const item = selectedPreset();
+      if (!item) return;
+
+      if (!confirm(`Delete "${item.name}"?`)) return;
+
+      presetRequest('delete', { id: item.id });
     }
 
     function initialize() {
       for (let i = 0; i < 8; i++) {
-        $("strip").add(new Option(
-          i < 5 ? `Strip ${i} - Hardware ${i + 1}` :
-            `Strip ${i} - Virtual ${i - 4}`,
+        $('strip').add(new Option(
+          i < 5
+            ? `Strip ${i} - Hardware ${i + 1}`
+            : `Strip ${i} - Virtual ${i - 4}`,
           String(i)
         ));
       }
 
       for (const route of ROUTES) {
-        $("route").add(new Option(route, route));
+        $('route').add(new Option(route, route));
       }
 
-      $("strip").addEventListener("change", () => {
-        settings.strip = Number($("strip").value);
+      $('strip').addEventListener('change', () => {
+        settings.strip = Number($('strip').value);
+        dirty = true;
+        updatePreview();
         save();
-        render();
       });
 
-      $("route").addEventListener("change", () => {
-        settings.route = $("route").value;
+      $('route').addEventListener('change', () => {
+        settings.route = $('route').value;
+        dirty = true;
+        updatePreview();
         save();
-        render();
       });
 
-      $("step").addEventListener("change", () => {
-        const value = Number($("step").value);
+      $('step').addEventListener('change', () => {
+        const raw = $('step').value;
+        const value = Number(raw);
 
-        if (!Number.isFinite(value) || value < 0.1 || value > 12) {
-          $("status").textContent = "Gain step must be 0.1 to 12 dB";
+        if (
+          !raw.trim() ||
+          !Number.isFinite(value) ||
+          value < 0.1 ||
+          value > 12
+        ) {
+          status('Gain step must be 0.1 to 12 dB.', true);
+          render();
           return;
         }
 
         settings.step = value;
+        dirty = true;
         save();
       });
 
-      $("offTab").onclick = () => selectState("off");
-      $("onTab").onclick = () => selectState("on");
+      $('offTab').onclick = () => {
+        if (dirty && !save()) return;
+        state = 'off';
+        render();
+      };
 
-      for (const id of ["bg","fg","stroke"]) {
-        $(id).addEventListener("input", () => {
-          currentStyle()[id] = $(id).value;
-          preview();
-        });
-        $(id).addEventListener("change", save);
-      }
+      $('onTab').onclick = () => {
+        if (dirty && !save()) return;
+        state = 'on';
+        render();
+      };
 
-      $("svgFile").addEventListener("change", async () => {
-        const file = $("svgFile").files[0];
+      for (const key of [
+        'bg', 'fg', 'stroke', 'iconColor'
+      ]) bindColor(key);
+
+      $('outlineVisible').addEventListener('change', () => {
+        setProperty(
+          'outlineVisible',
+          $('outlineVisible').checked
+        );
+        render();
+        save();
+      });
+
+      bindNumber('outlineWidth', 0, 12);
+      bindNumber('outlineRadius', 0, 64);
+      bindNumber('iconX', -48, 48);
+      bindNumber('iconY', -48, 48);
+
+      $('iconScale').addEventListener('input', () => {
+        const value = Number($('iconScale').value);
+        $('scaleValue').textContent = value + '%';
+        setProperty('iconScale', value / 100);
+      });
+
+      $('iconScale').addEventListener('change', save);
+
+      $('svgFile').addEventListener('change', async () => {
+        const file = $('svgFile').files?.[0];
         if (!file) return;
 
         if (file.size > 32768) {
-          $("status").textContent = "SVG exceeds 32 KB";
+          status('SVG exceeds 32 KB.', true);
+          $('svgFile').value = '';
           return;
         }
 
-        const source = await file.text();
+        try {
+          const source = await file.text();
+          const sanitized = visual.sanitizeSvg(source);
 
-        if (!/^<svg[\s>]/i.test(source.trim()) ||
-            !/<\/svg>\s*$/i.test(source.trim())) {
-          $("status").textContent = "Invalid SVG file";
-          return;
+          if (!sanitized) {
+            status('Unsupported or unsafe SVG.', true);
+            $('svgFile').value = '';
+            return;
+          }
+
+          setProperty('svg', sanitized);
+          save();
+          render();
+        } catch {
+          status('Could not read SVG file.', true);
+          $('svgFile').value = '';
         }
-
-        if (/<\/?(?!svg\b|g\b|path\b|rect\b|circle\b|ellipse\b|line\b|polyline\b|polygon\b)[a-z][\w:-]*/i.test(source) ||
-            /\bon[a-z]+\s*=|href\s*=|style\s*=|url\s*\(|@|<!|<\?/i.test(source)) {
-          $("status").textContent = "Unsupported or unsafe SVG content";
-          return;
-        }
-
-        currentStyle().svg = source;
-        save();
-        render();
       });
 
-      $("clearSvg").onclick = () => {
+      $('clearSvg').onclick = () => {
         delete currentStyle().svg;
+        dirty = true;
         save();
         render();
       };
 
-      $("resetStyle").onclick = () => {
+      $('resetStyle').onclick = () => {
         settings.styles ??= {};
         delete settings.styles[state];
+        dirty = true;
         save();
         render();
       };
+
+      $('refreshPresets').onclick = () => {
+        refreshPresets(true);
+      };
+
+      $('presetSelect').addEventListener(
+        'pointerenter',
+        () => refreshPresets()
+      );
+
+      $('presetSelect').addEventListener(
+        'focus',
+        () => refreshPresets()
+      );
+
+      $('presetSelect').addEventListener(
+        'change',
+        updatePresetControls
+      );
+
+      $('savePreset').onclick = createPreset;
+      $('applyPreset').onclick = applyPreset;
+      $('renamePreset').onclick = renamePreset;
+      $('deletePreset').onclick = deletePreset;
+
+      window.addEventListener('focus', () => {
+        refreshPresets();
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          refreshPresets();
+        }
+      });
+
+      renderPresetList();
     }
 
     window.connectElgatoStreamDeckSocket =
     window.connectOpenActionSocket =
       (port, uuid, event, info, actionInfo) => {
         const details = JSON.parse(actionInfo);
-        context = uuid;
-        action = details.action.replace(PREFIX, "");
-        settings = details.payload?.settings ?? {};
+        const nextContext = uuid;
 
-        $("heading").textContent = "Voicemeeter - " + action;
+        if (ws) {
+          ws.onclose = null;
+          ws.close();
+        }
+
+        if (presetTimer) clearTimeout(presetTimer);
+        presetTimer = null;
+        pendingRequest = null;
+        refreshQueued = false;
+
+        context = nextContext;
+        fullAction = details.action;
+        action = fullAction.replace(PREFIX, '');
+        settings = details.payload?.settings ?? {};
+        dirty = false;
+        state = 'off';
+
+        presetsLoaded = false;
+        presets = [];
+
+        $('heading').textContent =
+          'Voicemeeter — ' + action;
+
+        renderPresetList();
+        render();
 
         ws = new WebSocket(`ws://127.0.0.1:${port}`);
 
         ws.onopen = () => {
           send(event, { uuid });
-          send("getSettings", {
+
+          send('getSettings', {
             context,
-            action: details.action
+            action: fullAction
           });
+
+          refreshPresets(true);
         };
 
         ws.onmessage = message => {
-          const data = JSON.parse(message.data);
-          if (data.event === "didReceiveSettings") {
+          let data;
+
+          try {
+            data = JSON.parse(message.data);
+          } catch {
+            return;
+          }
+
+          if (
+            data.event === 'didReceiveSettings' &&
+            !dirty
+          ) {
             settings = data.payload?.settings ?? {};
             render();
           }
+
+          if (
+            data.event === 'sendToPropertyInspector'
+          ) {
+            handlePresetReply(data.payload);
+          }
         };
 
-        render();
+        ws.onclose = () => {
+          if (presetTimer) clearTimeout(presetTimer);
+          presetTimer = null;
+          pendingRequest = null;
+          refreshQueued = false;
+          presetsLoaded = false;
+
+          renderPresetList();
+          status('Inspector disconnected.', true);
+        };
+
+        ws.onerror = () => {
+          status('Inspector connection error.', true);
+        };
       };
 
     initialize();
+
+    if (!visual) {
+      status('Missing ui/visual.js in the package.', true);
+    }
   </script>
 </body>
 </html>

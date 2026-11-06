@@ -1,8 +1,8 @@
 {
   "Name": "Voicemeeter Potato",
   "Description": "Control Voicemeeter Potato strips from OpenDeck",
-  "Author": "OpenDeck Voicemeeter",
-  "Version": "0.1.1",
+  "Author": "ATNO",
+  "Version": "0.2.0",
   "Category": "Voicemeeter",
   "Icon": "icons/plugin",
   "CodePathWin": "dist/index.js",
@@ -17,7 +17,7 @@
   ],
   "Actions": [
     {
-      "UUID": "com.opendeck.voicemeeter.gainup",
+      "UUID": "dev.atno.voicemeeter.gainup",
       "Name": "Gain Up",
       "Tooltip": "Increase strip gain",
       "Icon": "icons/gainup",
@@ -30,7 +30,7 @@
       "PropertyInspectorPath": "ui/inspector.html"
     },
     {
-      "UUID": "com.opendeck.voicemeeter.gaindown",
+      "UUID": "dev.atno.voicemeeter.gaindown",
       "Name": "Gain Down",
       "Tooltip": "Decrease strip gain",
       "Icon": "icons/gaindown",
@@ -43,7 +43,7 @@
       "PropertyInspectorPath": "ui/inspector.html"
     },
     {
-      "UUID": "com.opendeck.voicemeeter.mute",
+      "UUID": "dev.atno.voicemeeter.mute",
       "Name": "Mute",
       "Tooltip": "Toggle strip mute",
       "Icon": "icons/mute",
@@ -56,7 +56,7 @@
       "PropertyInspectorPath": "ui/inspector.html"
     },
     {
-      "UUID": "com.opendeck.voicemeeter.solo",
+      "UUID": "dev.atno.voicemeeter.solo",
       "Name": "Solo",
       "Tooltip": "Toggle strip solo",
       "Icon": "icons/solo",
@@ -69,7 +69,7 @@
       "PropertyInspectorPath": "ui/inspector.html"
     },
     {
-      "UUID": "com.opendeck.voicemeeter.mono",
+      "UUID": "dev.atno.voicemeeter.mono",
       "Name": "Mono / Stereo",
       "Tooltip": "Toggle strip mono",
       "Icon": "icons/mono",
@@ -82,7 +82,7 @@
       "PropertyInspectorPath": "ui/inspector.html"
     },
     {
-      "UUID": "com.opendeck.voicemeeter.route",
+      "UUID": "dev.atno.voicemeeter.route",
       "Name": "Strip Routing",
       "Tooltip": "Toggle strip routing A1-A5 or B1-B3",
       "Icon": "icons/route",
