@@ -1,0 +1,98 @@
+{
+  "Name": "Voicemeeter Potato",
+  "Description": "Control Voicemeeter Potato strips from OpenDeck",
+  "Author": "OpenDeck Voicemeeter",
+  "Version": "0.1.1",
+  "Category": "Voicemeeter",
+  "Icon": "icons/plugin",
+  "CodePathWin": "dist/index.js",
+  "Nodejs": {
+    "Version": "20"
+  },
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Actions": [
+    {
+      "UUID": "com.opendeck.voicemeeter.gainup",
+      "Name": "Gain Up",
+      "Tooltip": "Increase strip gain",
+      "Icon": "icons/gainup",
+      "States": [
+        {
+          "Image": "icons/gainup"
+        }
+      ],
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/inspector.html"
+    },
+    {
+      "UUID": "com.opendeck.voicemeeter.gaindown",
+      "Name": "Gain Down",
+      "Tooltip": "Decrease strip gain",
+      "Icon": "icons/gaindown",
+      "States": [
+        {
+          "Image": "icons/gaindown"
+        }
+      ],
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/inspector.html"
+    },
+    {
+      "UUID": "com.opendeck.voicemeeter.mute",
+      "Name": "Mute",
+      "Tooltip": "Toggle strip mute",
+      "Icon": "icons/mute",
+      "States": [
+        {
+          "Image": "icons/mute"
+        }
+      ],
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/inspector.html"
+    },
+    {
+      "UUID": "com.opendeck.voicemeeter.solo",
+      "Name": "Solo",
+      "Tooltip": "Toggle strip solo",
+      "Icon": "icons/solo",
+      "States": [
+        {
+          "Image": "icons/solo"
+        }
+      ],
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/inspector.html"
+    },
+    {
+      "UUID": "com.opendeck.voicemeeter.mono",
+      "Name": "Mono / Stereo",
+      "Tooltip": "Toggle strip mono",
+      "Icon": "icons/mono",
+      "States": [
+        {
+          "Image": "icons/mono"
+        }
+      ],
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/inspector.html"
+    },
+    {
+      "UUID": "com.opendeck.voicemeeter.route",
+      "Name": "Strip Routing",
+      "Tooltip": "Toggle strip routing A1-A5 or B1-B3",
+      "Icon": "icons/route",
+      "States": [
+        {
+          "Image": "icons/route"
+        }
+      ],
+      "Controllers": ["Keypad"],
+      "PropertyInspectorPath": "ui/inspector.html"
+    }
+  ]
+}

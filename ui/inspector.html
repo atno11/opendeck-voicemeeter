@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Voicemeeter Settings</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+    }
+
+    body {
+      margin: 0;
+      padding: 14px;
+      background: #202127;
+      color: #eceef4;
+    }
+
+    h3 {
+      font-size: 14px;
+      margin: 0 0 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #b7bdc9;
+      margin: 10px 0 5px;
+    }
+
+    select, input[type="number"] {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 8px;
+      background: #30333c;
+      color: white;
+      border: 1px solid #484c59;
+      border-radius: 5px;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 33px;
+      padding: 2px;
+      border: 1px solid #484c59;
+      border-radius: 5px;
+      background: #30333c;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      font-size: 11px;
+    }
+
+    button {
+      background: #454b5b;
+      color: white;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .state-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .state-tabs button.selected {
+      background: #287b6c;
+    }
+
+    .preview {
+      width: 108px;
+      height: 108px;
+      display: block;
+      margin: 14px auto;
+      border-radius: 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #a8afbe;
+      margin-top: 6px;
+    }
+
+    .status {
+      min-height: 16px;
+      color: #7fd9b4;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <h3 id="heading">Voicemeeter Potato</h3>
+
+  <label for="strip">Strip</label>
+  <select id="strip"></select>
+
+  <div id="gainFields" class="hidden">
+    <label for="step">Gain step (dB)</label>
+    <input id="step" type="number" min="0.1" max="12" step="0.1">
+  </div>
+
+  <div id="routeFields" class="hidden">
+    <label for="route">Routing bus</label>
+    <select id="route"></select>
+  </div>
+
+  <div class="state-tabs">
+    <button id="offTab" class="selected">OFF / Normal</button>
+    <button id="onTab">ON / Active</button>
+  </div>
+
+  <div class="row">
+    <div>
+      <label for="bg">Background</label>
+      <input type="color" id="bg">
+    </div>
+    <div>
+      <label for="fg">Foreground</label>
+      <input type="color" id="fg">
+    </div>
+  </div>
+
+  <label for="stroke">Outline</label>
+  <input type="color" id="stroke">
+
+  <label for="svgFile">Custom SVG for this state</label>
+  <input type="file" id="svgFile" accept=".svg,image/svg+xml">
+  <div class="hint">Maximum 32 KB. Simple vector SVGs only.</div>
+
+  <div class="row" style="margin-top:10px">
+    <button id="clearSvg">Use default icon</button>
+    <button id="resetStyle">Reset state style</button>
+  </div>
+
+  <img id="preview" class="preview" alt="Icon preview">
+  <div class="status" id="status"></div>
+
+  <script>
+    "use strict";
+
+    const PREFIX = "com.opendeck.voicemeeter.";
+    const ROUTES = ["A1","A2","A3","A4","A5","B1","B2","B3"];
+    const $ = id => document.getElementById(id);
+
+    let ws;
+    let context = "";
+    let action = "";
+    let settings = {};
+    let state = "off";
+
+    const defaults = active => ({
+      bg: active ? (action === "mute" ? "#842c38" : "#18534b") : "#171c27",
+      fg: "#ffffff",
+      stroke: active ? "#54e5bb" : "#65748b"
+    });
+
+    function send(event, payload) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      ws.send(JSON.stringify({ event, ...payload }));
+    }
+
+    function save() {
+      send("setSettings", {
+        action: PREFIX + action,
+        context,
+        payload: settings
+      });
+      $("status").textContent = "Settings saved";
+    }
+
+    function currentStyle() {
+      settings.styles ??= {};
+      settings.styles[state] ??= {};
+      return settings.styles[state];
+    }
+
+    function symbol() {
+      switch (action) {
+        case "gainup": return "+";
+        case "gaindown": return "−";
+        case "mute": return "M";
+        case "solo": return "S";
+        case "mono": return "MONO";
+        case "route": return settings.route || "A1";
+        default: return "VM";
+      }
+    }
+
+    function preview() {
+      const colors = {
+        ...defaults(state === "on"),
+        ...currentStyle()
+      };
+
+      const text = symbol();
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg"
+          width="144" height="144" viewBox="0 0 144 144">
+          <rect width="144" height="144" rx="17"
+            fill="${colors.bg}"/>
+          <rect x="5" y="5" width="134" height="134" rx="13"
+            fill="none" stroke="${colors.stroke}" stroke-width="5"/>
+          <text x="72" y="87" text-anchor="middle"
+            font-family="Arial" font-weight="bold"
+            font-size="${text.length > 2 ? 25 : 56}"
+            fill="${colors.fg}">${text}</text>
+        </svg>`;
+
+      const custom = currentStyle().svg;
+      if (custom) {
+        const encoded = btoa(
+          Array.from(new TextEncoder().encode(custom),
+            byte => String.fromCharCode(byte)).join("")
+        );
+
+        const customImage = `<image x="24" y="22"
+          width="96" height="96"
+          href="data:image/svg+xml;base64,${encoded}"/>`;
+
+        const combined = svg.replace(/<text[\s\S]*?<\/text>/, customImage);
+        $("preview").src = "data:image/svg+xml;charset=utf-8," +
+          encodeURIComponent(combined);
+      } else {
+        $("preview").src = "data:image/svg+xml;charset=utf-8," +
+          encodeURIComponent(svg);
+      }
+    }
+
+    function render() {
+      $("strip").value = String(settings.strip ?? 0);
+      $("step").value = String(settings.step ?? 1);
+      $("route").value = settings.route ?? "A1";
+
+      $("gainFields").classList.toggle(
+        "hidden",
+        !["gainup","gaindown"].includes(action)
+      );
+      $("routeFields").classList.toggle(
+        "hidden",
+        action !== "route"
+      );
+
+      const colors = { ...defaults(state === "on"), ...currentStyle() };
+
+      for (const id of ["bg","fg","stroke"]) {
+        $(id).value = colors[id];
+      }
+
+      $("offTab").classList.toggle("selected", state === "off");
+      $("onTab").classList.toggle("selected", state === "on");
+      $("svgFile").value = "";
+
+      preview();
+    }
+
+    function selectState(next) {
+      state = next;
+      render();
+    }
+
+    function initialize() {
+      for (let i = 0; i < 8; i++) {
+        $("strip").add(new Option(
+          i < 5 ? `Strip ${i} - Hardware ${i + 1}` :
+            `Strip ${i} - Virtual ${i - 4}`,
+          String(i)
+        ));
+      }
+
+      for (const route of ROUTES) {
+        $("route").add(new Option(route, route));
+      }
+
+      $("strip").addEventListener("change", () => {
+        settings.strip = Number($("strip").value);
+        save();
+        render();
+      });
+
+      $("route").addEventListener("change", () => {
+        settings.route = $("route").value;
+        save();
+        render();
+      });
+
+      $("step").addEventListener("change", () => {
+        const value = Number($("step").value);
+
+        if (!Number.isFinite(value) || value < 0.1 || value > 12) {
+          $("status").textContent = "Gain step must be 0.1 to 12 dB";
+          return;
+        }
+
+        settings.step = value;
+        save();
+      });
+
+      $("offTab").onclick = () => selectState("off");
+      $("onTab").onclick = () => selectState("on");
+
+      for (const id of ["bg","fg","stroke"]) {
+        $(id).addEventListener("input", () => {
+          currentStyle()[id] = $(id).value;
+          preview();
+        });
+        $(id).addEventListener("change", save);
+      }
+
+      $("svgFile").addEventListener("change", async () => {
+        const file = $("svgFile").files[0];
+        if (!file) return;
+
+        if (file.size > 32768) {
+          $("status").textContent = "SVG exceeds 32 KB";
+          return;
+        }
+
+        const source = await file.text();
+
+        if (!/^<svg[\s>]/i.test(source.trim()) ||
+            !/<\/svg>\s*$/i.test(source.trim())) {
+          $("status").textContent = "Invalid SVG file";
+          return;
+        }
+
+        if (/<\/?(?!svg\b|g\b|path\b|rect\b|circle\b|ellipse\b|line\b|polyline\b|polygon\b)[a-z][\w:-]*/i.test(source) ||
+            /\bon[a-z]+\s*=|href\s*=|style\s*=|url\s*\(|@|<!|<\?/i.test(source)) {
+          $("status").textContent = "Unsupported or unsafe SVG content";
+          return;
+        }
+
+        currentStyle().svg = source;
+        save();
+        render();
+      });
+
+      $("clearSvg").onclick = () => {
+        delete currentStyle().svg;
+        save();
+        render();
+      };
+
+      $("resetStyle").onclick = () => {
+        settings.styles ??= {};
+        delete settings.styles[state];
+        save();
+        render();
+      };
+    }
+
+    window.connectElgatoStreamDeckSocket =
+    window.connectOpenActionSocket =
+      (port, uuid, event, info, actionInfo) => {
+        const details = JSON.parse(actionInfo);
+        context = uuid;
+        action = details.action.replace(PREFIX, "");
+        settings = details.payload?.settings ?? {};
+
+        $("heading").textContent = "Voicemeeter - " + action;
+
+        ws = new WebSocket(`ws://127.0.0.1:${port}`);
+
+        ws.onopen = () => {
+          send(event, { uuid });
+          send("getSettings", {
+            context,
+            action: details.action
+          });
+        };
+
+        ws.onmessage = message => {
+          const data = JSON.parse(message.data);
+          if (data.event === "didReceiveSettings") {
+            settings = data.payload?.settings ?? {};
+            render();
+          }
+        };
+
+        render();
+      };
+
+    initialize();
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "opendeck-voicemeeter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenDeck Voicemeeter Potato plugin",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "package": "sh scripts/package.sh"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.0",
+    "typescript": "~5.9.3"
+  }
+}

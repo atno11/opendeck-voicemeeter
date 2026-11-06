@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="144" height="144"
+     viewBox="0 0 144 144"
+     fill="none"
+     stroke="#FFFFFF"
+     stroke-width="8"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+  
+  <path d="M22 72H62"/>
+  <path d="M62 72L98 38"/>
+  <path d="M62 72L98 106"/>
+  <path d="M98 38H119"/>
+  <path d="M98 106H119"/>
+  <circle cx="119" cy="38" r="5"/>
+  <circle cx="119" cy="106" r="5"/>
+
+</svg>
